@@ -145,6 +145,27 @@ Assets/
 | `FurnitureData.cs` | ScriptableObject for furniture stats |
 | `TimerUI.cs` | Timer screen UI |
 | `HomeUI.cs` | Home editor UI |
+| `ShopManager.cs` | Shop system with purchase logic |
+| `ShopUI.cs` | Shop screen UI |
+| `ProfileUI.cs` | Profile/stats screen UI |
+| `SceneLoader.cs` | Scene navigation helper |
+| `BottomNavigationUI.cs` | Tab bar navigation |
+| `RoomBackground.cs` | Room theme management |
+
+### Editor Tools
+
+The project includes custom editor tools to help with development:
+
+1. **Furniture Data Generator** (Menu: FocusHome > Generate Furniture Data)
+   - Generates default furniture ScriptableObjects
+   - Creates placeholder sprites for testing
+   - Access via Unity menu bar
+
+2. **Usage:**
+   - Open Unity
+   - Go to menu: `FocusHome > Generate Furniture Data`
+   - Click "Generate All Default Furniture" to create furniture data
+   - Click "Generate Placeholder Sprites" for colored test sprites
 
 ### Tips for Homescapes-Style Graphics
 
