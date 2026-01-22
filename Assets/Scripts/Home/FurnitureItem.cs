@@ -64,9 +64,9 @@ namespace FocusHome
             gridPosition = position;
             instanceId = System.Guid.NewGuid().ToString();
 
-            if (spriteRenderer != null && data.previewSprite != null)
+            if (spriteRenderer != null && data.Sprite != null)
             {
-                spriteRenderer.sprite = data.previewSprite;
+                spriteRenderer.sprite = data.Sprite;
             }
 
             UpdateSortingOrder();
@@ -173,12 +173,12 @@ namespace FocusHome
             }
 
             // Snap to grid or validate position
-            if (homeManager != null)
+            if (homeManager != null && furnitureData != null)
             {
                 Vector3 worldPos = transform.position;
                 Vector2Int newGridPos = homeManager.WorldToGrid(worldPos);
 
-                if (homeManager.CanPlaceAt(newGridPos, furnitureData.size, instanceId))
+                if (homeManager.CanPlaceAt(newGridPos, furnitureData.GridSize, instanceId))
                 {
                     gridPosition = newGridPos;
                     transform.position = homeManager.GridToWorld(newGridPos);
@@ -208,7 +208,7 @@ namespace FocusHome
             return new FurnitureSaveData
             {
                 instanceId = instanceId,
-                furnitureId = furnitureData?.furnitureId ?? "",
+                furnitureId = furnitureData?.Id ?? "",
                 gridX = gridPosition.x,
                 gridY = gridPosition.y,
                 rotation = rotation

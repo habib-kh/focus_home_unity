@@ -3,6 +3,16 @@ using UnityEngine.SceneManagement;
 
 namespace FocusHome
 {
+    [System.Serializable]
+    public struct PlayerData
+    {
+        public int totalFocusMinutes;
+        public int currentStreak;
+        public int longestStreak;
+        public int sessionsCompleted;
+        public int totalCoinsEarned;
+    }
+
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
@@ -14,6 +24,8 @@ namespace FocusHome
 
         [Header("Settings")]
         public int coinsPerMinute = 1;
+
+        private PlayerData playerData;
 
         private void Awake()
         {
@@ -31,8 +43,12 @@ namespace FocusHome
 
         private void InitializeGame()
         {
-            // Load saved data
             LoadGameData();
+        }
+
+        public PlayerData GetPlayerData()
+        {
+            return playerData;
         }
 
         public void LoadGameData()
@@ -44,13 +60,14 @@ namespace FocusHome
                 coinManager.SetCoins(savedCoins);
             }
 
-            // Load total focus minutes
-            int totalMinutes = PlayerPrefs.GetInt("TotalFocusMinutes", 0);
+            // Load player data
+            playerData.totalFocusMinutes = PlayerPrefs.GetInt("TotalFocusMinutes", 0);
+            playerData.currentStreak = PlayerPrefs.GetInt("CurrentStreak", 0);
+            playerData.longestStreak = PlayerPrefs.GetInt("LongestStreak", 0);
+            playerData.sessionsCompleted = PlayerPrefs.GetInt("SessionsCompleted", 0);
+            playerData.totalCoinsEarned = PlayerPrefs.GetInt("TotalCoinsEarned", 0);
 
-            // Load streak
-            int currentStreak = PlayerPrefs.GetInt("CurrentStreak", 0);
-
-            Debug.Log($"Game loaded - Coins: {savedCoins}, Total Minutes: {totalMinutes}, Streak: {currentStreak}");
+            Debug.Log($"Game loaded - Coins: {savedCoins}, Total Minutes: {playerData.totalFocusMinutes}, Streak: {playerData.currentStreak}");
         }
 
         public void SaveGameData()
@@ -59,6 +76,13 @@ namespace FocusHome
             {
                 PlayerPrefs.SetInt("Coins", coinManager.CurrentCoins);
             }
+
+            PlayerPrefs.SetInt("TotalFocusMinutes", playerData.totalFocusMinutes);
+            PlayerPrefs.SetInt("CurrentStreak", playerData.currentStreak);
+            PlayerPrefs.SetInt("LongestStreak", playerData.longestStreak);
+            PlayerPrefs.SetInt("SessionsCompleted", playerData.sessionsCompleted);
+            PlayerPrefs.SetInt("TotalCoinsEarned", playerData.totalCoinsEarned);
+
             PlayerPrefs.Save();
             Debug.Log("Game data saved");
         }
@@ -68,9 +92,10 @@ namespace FocusHome
             int earnedCoins = minutes * coinsPerMinute;
             coinManager?.AddCoins(earnedCoins);
 
-            // Update total focus minutes
-            int totalMinutes = PlayerPrefs.GetInt("TotalFocusMinutes", 0) + minutes;
-            PlayerPrefs.SetInt("TotalFocusMinutes", totalMinutes);
+            // Update player data
+            playerData.totalFocusMinutes += minutes;
+            playerData.sessionsCompleted++;
+            playerData.totalCoinsEarned += earnedCoins;
 
             // Update streak
             UpdateStreak();
@@ -91,8 +116,6 @@ namespace FocusHome
             string today = System.DateTime.Now.ToString("yyyy-MM-dd");
             string yesterday = System.DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
 
-            int currentStreak = PlayerPrefs.GetInt("CurrentStreak", 0);
-
             if (lastFocusDate == today)
             {
                 // Already focused today, no change
@@ -100,29 +123,38 @@ namespace FocusHome
             else if (lastFocusDate == yesterday)
             {
                 // Consecutive day
-                currentStreak++;
-                PlayerPrefs.SetInt("CurrentStreak", currentStreak);
+                playerData.currentStreak++;
             }
             else
             {
                 // Streak broken or first time
-                currentStreak = 1;
-                PlayerPrefs.SetInt("CurrentStreak", currentStreak);
+                playerData.currentStreak = 1;
             }
 
             PlayerPrefs.SetString("LastFocusDate", today);
 
             // Update longest streak
-            int longestStreak = PlayerPrefs.GetInt("LongestStreak", 0);
-            if (currentStreak > longestStreak)
+            if (playerData.currentStreak > playerData.longestStreak)
             {
-                PlayerPrefs.SetInt("LongestStreak", currentStreak);
+                playerData.longestStreak = playerData.currentStreak;
             }
         }
 
         public void LoadScene(string sceneName)
         {
             SceneManager.LoadScene(sceneName);
+        }
+
+        public void ResetAllData()
+        {
+            playerData = new PlayerData();
+            if (coinManager != null)
+            {
+                coinManager.SetCoins(0);
+            }
+            PlayerPrefs.DeleteAll();
+            SaveGameData();
+            Debug.Log("All data reset");
         }
 
         private void OnApplicationPause(bool pauseStatus)

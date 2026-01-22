@@ -20,24 +20,39 @@ namespace FocusHome
     public class FurnitureData : ScriptableObject
     {
         [Header("Basic Info")]
-        public string furnitureId;
-        public string furnitureName;
-        [TextArea] public string description;
-        public FurnitureCategory category;
+        [SerializeField] private string id;
+        [SerializeField] private string furnitureName;
+        [TextArea] [SerializeField] private string description;
+        [SerializeField] private FurnitureCategory category;
 
         [Header("Visuals")]
-        public Sprite previewSprite;
-        public GameObject prefab;
-        public Vector2 size = Vector2.one; // Grid size
+        [SerializeField] private Sprite sprite;
+        [SerializeField] private GameObject prefab;
+        [SerializeField] private Vector2Int gridSize = Vector2Int.one;
 
         [Header("Shop")]
-        public int price = 100;
-        public bool isAvailable = true;
-        public bool isSpecial = false;
+        [SerializeField] private int price = 100;
+        [SerializeField] private bool isAvailable = true;
+        [SerializeField] private bool isSpecial = false;
 
         [Header("Unlock")]
-        public bool requiresUnlock = false;
-        public int unlockAtFocusHours = 0;
-        public string unlockAchievementId;
+        [SerializeField] private bool requiresUnlock = false;
+        [SerializeField] private int unlockAtFocusHours = 0;
+        [SerializeField] private string unlockAchievementId;
+
+        // Public properties for access
+        public string Id => id;
+        public string FurnitureName => furnitureName;
+        public string Description => description;
+        public FurnitureCategory Category => category;
+        public Sprite Sprite => sprite;
+        public GameObject Prefab => prefab;
+        public Vector2Int GridSize => gridSize;
+        public int Price => price;
+        public bool IsAvailable => isAvailable;
+        public bool IsSpecial => isSpecial;
+        public bool RequiresUnlock => requiresUnlock;
+        public int UnlockAtFocusHours => unlockAtFocusHours;
+        public string UnlockAchievementId => unlockAchievementId;
     }
 }

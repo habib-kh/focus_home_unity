@@ -38,7 +38,7 @@ namespace FocusHome
         public bool IsEditMode => isEditMode;
         public FurnitureItem SelectedFurniture => selectedFurniture;
         public List<FurnitureData> FurnitureCatalog => furnitureCatalog;
-        public Vector2Int GridSize => gridSize;
+        public Vector2Int RoomGridSize => gridSize;
 
         // Grid occupancy
         private bool[,] occupancyGrid;
@@ -133,13 +133,13 @@ namespace FocusHome
 
         public FurnitureItem PlaceFurniture(FurnitureData data, Vector2Int gridPos)
         {
-            if (data == null || data.prefab == null)
+            if (data == null || data.Prefab == null)
             {
                 Debug.LogError("Invalid furniture data or missing prefab");
                 return null;
             }
 
-            if (!CanPlaceAt(gridPos, data.size))
+            if (!CanPlaceAt(gridPos, data.GridSize))
             {
                 Debug.Log("Cannot place furniture at this position");
                 return null;
@@ -147,7 +147,7 @@ namespace FocusHome
 
             // Instantiate furniture
             Vector3 worldPos = GridToWorld(gridPos);
-            GameObject furnitureObj = Instantiate(data.prefab, worldPos, Quaternion.identity, furnitureContainer);
+            GameObject furnitureObj = Instantiate(data.Prefab, worldPos, Quaternion.identity, furnitureContainer);
 
             FurnitureItem item = furnitureObj.GetComponent<FurnitureItem>();
             if (item == null)
@@ -159,12 +159,12 @@ namespace FocusHome
             item.SetPlaced(true);
 
             // Update occupancy
-            SetOccupancy(gridPos, data.size, true);
+            SetOccupancy(gridPos, data.GridSize, true);
 
             placedFurniture.Add(item);
             OnFurniturePlaced?.Invoke(item);
 
-            Debug.Log($"Placed {data.furnitureName} at {gridPos}");
+            Debug.Log($"Placed {data.FurnitureName} at {gridPos}");
             return item;
         }
 
@@ -175,7 +175,7 @@ namespace FocusHome
             // Clear occupancy
             if (item.Data != null)
             {
-                SetOccupancy(item.GridPosition, item.Data.size, false);
+                SetOccupancy(item.GridPosition, item.Data.GridSize, false);
             }
 
             placedFurniture.Remove(item);
@@ -185,10 +185,10 @@ namespace FocusHome
             Debug.Log("Furniture removed");
         }
 
-        public bool CanPlaceAt(Vector2Int gridPos, Vector2 size, string excludeInstanceId = null)
+        public bool CanPlaceAt(Vector2Int gridPos, Vector2Int size, string excludeInstanceId = null)
         {
-            int sizeX = Mathf.CeilToInt(size.x);
-            int sizeY = Mathf.CeilToInt(size.y);
+            int sizeX = size.x;
+            int sizeY = size.y;
 
             for (int x = 0; x < sizeX; x++)
             {
@@ -209,7 +209,7 @@ namespace FocusHome
                         // Check if this cell is occupied by the item we're excluding
                         var occupyingItem = placedFurniture.FirstOrDefault(f =>
                             f.InstanceId != excludeInstanceId &&
-                            IsWithinBounds(new Vector2Int(checkX, checkY), f.GridPosition, f.Data?.size ?? Vector2.one));
+                            IsWithinBounds(new Vector2Int(checkX, checkY), f.GridPosition, f.Data?.GridSize ?? Vector2Int.one));
 
                         if (occupyingItem != null)
                         {
@@ -222,16 +222,16 @@ namespace FocusHome
             return true;
         }
 
-        private bool IsWithinBounds(Vector2Int point, Vector2Int origin, Vector2 size)
+        private bool IsWithinBounds(Vector2Int point, Vector2Int origin, Vector2Int size)
         {
             return point.x >= origin.x && point.x < origin.x + size.x &&
                    point.y >= origin.y && point.y < origin.y + size.y;
         }
 
-        private void SetOccupancy(Vector2Int gridPos, Vector2 size, bool occupied)
+        private void SetOccupancy(Vector2Int gridPos, Vector2Int size, bool occupied)
         {
-            int sizeX = Mathf.CeilToInt(size.x);
-            int sizeY = Mathf.CeilToInt(size.y);
+            int sizeX = size.x;
+            int sizeY = size.y;
 
             for (int x = 0; x < sizeX; x++)
             {
@@ -293,7 +293,7 @@ namespace FocusHome
 
                 foreach (var saveData in saveDataList.items)
                 {
-                    var furnitureData = furnitureCatalog.FirstOrDefault(f => f.furnitureId == saveData.furnitureId);
+                    var furnitureData = furnitureCatalog.FirstOrDefault(f => f.Id == saveData.furnitureId);
                     if (furnitureData != null)
                     {
                         var item = PlaceFurniture(furnitureData, new Vector2Int(saveData.gridX, saveData.gridY));
